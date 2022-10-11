@@ -1,6 +1,6 @@
 ## * Spring
 
-### teting
+### testing
 
 1. [단위테스트 (Unit Test)](./spring/testing) <sup>2022/10/11</sup>
 2. [단위 테스트를 위한 F.I.R.S.T 원칙](./spring/testing)<sup>2022/10/11</sup>
