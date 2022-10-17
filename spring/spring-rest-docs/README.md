@@ -13,11 +13,11 @@
 | **2. [Spring Rest Docs API 문서 생성 흐름](#2-spring-rest-docs-api-문서-생성-흐름-20221018) <sup>2022/10/18</sup>** |
 | **3. [Spring Rest Docs 설정](#3-spring-rest-docs-설정-20221018) <sup>2022/10/18</sup>** |
 | **4. [API 문서 생성을 위한 슬라이스 테스트 케이스 작성](#4-api-문서-생성을-위한-슬라이스-테스트-케이스-작성-20221018) <sup>2022/10/18</sup>**<br /> - API문서 생성을 위한 테스트 케이스 기본 구조 |
-| **5. [API 문서 생성을 위한 API 스펙 정보 추가](#5-api-문서-생성을-위한-api-스펙-정보-추가-20221018) <sup>2022/10/18</sup>**<br /> -[ MemberController의 postMember() 핸들러 메서드에 대한 API 스펙 정보 추가](#membercontroller의-postmember()-핸들러-메서드에-대한-API-스펙-정보-추가) |
+| **5. [API 문서 생성을 위한 API 스펙 정보 추가 (1/2)](#5-api-문서-생성을-위한-api-스펙-정보-추가-(1/2)-20221018) <sup>2022/10/18</sup>**<br />- MemberController의 postMember() 핸들러 메서드에 대한 API 스펙 정보 추가<br />**5.** **[API 문서 생성을 위한 API 스펙 정보 추가 (2/2)](#5-api-문서-생성을-위한-api-스펙-정보-추가-(2/2)-20221018) <sup>2022/10/18</sup>** <br />- MemberController의 patchMember() 핸들러 메서드에 대한 API 스펙 정보 추가 |
 | **6. [API 문서 템플릿 생성을 위한 디렉토리 및 템플릿 문서 생성](#6-api-문서-템플릿-생성을-위한-디렉토리-및-템플릿-문서-생성-20221018) <sup>2022/10/18</sup>** |
 | **7. [템플릿 문서 내용 추가](#7-템플릿-문서-내용-추가-20221018) <sup>2022/10/18</sup>** |
 | **8. [템플릿 문서를 HTML 파일로 변환](#8-템플릿-문서를-html-파일로-변환-20221018) <sup>2022/10/18</sup>** |
-| **9. [Spring Rest Docs에서의 Asciidoc](#9-spring-rest-docs에서의-asciidoc-20221018) <sup>2022/10/18</sup>**<br /> - [Asciidoc이란?](#asciidoc이란?)<br /> - [Asciidoctor란?](#asciidoctor란?) |
+| **9. [Spring Rest Docs에서의 Asciidoc](#9-spring-rest-docs에서의-asciidoc-20221018) <sup>2022/10/18</sup>**<br /> - [[ 9-1 ] Asciidoc이란?](#-9-1-asciidoc이란-)<br /> - [[ 9-2 ]Asciidoctor란?](#-9-2-asciidoctor란-) |
 
 <br>
 
@@ -33,11 +33,15 @@
 
 ### 1. Spring Rest Docs 장점 <sup>2022/10/18</sup>
 
+> [목차로 바로가기](#목차)
+
 - 테스트 케이스에서 전송하는 API 문서 정보와 Controller에서 구현한 Request Body, Response Body, Query Parmeter등의 정보가 하나라도 일치하지 않으면 테스트 케이스의 실행 결과과 failed되면서 API 문서가 정상적으로 생성이 되지 않습니다. 즉, Controller에 정의되어 있는 Request Body나 Response Body 등의 API 스펙 정보와 일치해야 API 문서가 만들어지기 때문에 문서의 정보 불일치로 인해 발생하는 문제를 방지할 수 있습니다.
 
 <BR>
 
 ### 2. Spring Rest Docs API 문서 생성 흐름 <sup>2022/10/18</sup>
+
+> [목차로 바로가기](#목차)
 
 <img src="https://user-images.githubusercontent.com/72078208/196195941-817fa549-f598-493e-b1e3-1537eb31ee2f.png" alt="image" style="zoom:67%;" />
 
@@ -59,6 +63,8 @@
 <BR>
 
 ### 3. Spring Rest Docs 설정 <sup>2022/10/18</sup>
+
+> [목차로 바로가기](#목차)
 
 ```tex
 - build.gradle설정
@@ -178,6 +184,8 @@ bootJar {
 
 ### 4. API 문서 생성을 위한 슬라이스 테스트 케이스 작성 <sup>2022/10/18</sup>
 
+> [목차로 바로가기](#목차)
+
 - **API문서 생성을 위한 테스트 케이스 기본 구조**
 
 ```java
@@ -277,6 +285,8 @@ public class MemberControllerRestDocsTest {
 <br>
 
 ### 5. API 문서 생성을 위한 API 스펙 정보 추가 (1/2) <sup>2022/10/18</sup>
+
+> [목차로 바로가기](#목차)
 
 - **MemberController의 postMember() 핸들러 메서드에 대한 API 스펙 정보 추가**
 
@@ -522,6 +532,8 @@ f. (9-7)에서 `fieldWithPath("data.memberId")` 의 `data.memberId` 는 data 프
 
 ### 5. API 문서 생성을 위한 API 스펙 정보 추가 (2/2) <sup>2022/10/18</sup>
 
+> [목차로 바로가기](#목차)
+
 - **MemberController의 patchMember() 핸들러 메서드에 대한 API 스펙 정보 추가**
 
 - 이번에는 MemberController의 patchMember() 핸들러 메서드에 대한 API 스펙 정보를 테스트 케이스에 추가해 보겠습니다.
@@ -668,6 +680,8 @@ postMember() 핸들러 메서드에 대한 테스트 케이스와 크게 달라�
 
 ### 6. API 문서 템플릿 생성을 위한 디렉토리 및 템플릿 문서 생성 <sup>2022/10/18</sup>
 
+> [목차로 바로가기](#목차)
+
 >  지금까지 Controller의 테스트 케이스에 API 스펙 정보를 추가해서 API 문서 스니핏을 생성해 보았습니다.
 >
 >  생성한 API 문서 스니핏을 하나로 모아서 실제로 외부에 공개할 수 있는 API 문서를 만들어 보겠습니다.
@@ -687,6 +701,8 @@ postMember() 핸들러 메서드에 대한 테스트 케이스와 크게 달라�
 <br>
 
 ### 7. 템플릿 문서 내용 추가 <sup>2022/10/18</sup>
+
+> [목차로 바로가기](#목차)
 
 ```java
 = 커피 주문 애플리케이션    // (1)
@@ -760,6 +776,8 @@ include::{snippets}/patch-member/response-fields.adoc[]
 
 ### 8. 템플릿 문서를 HTML 파일로 변환 <sup>2022/10/18</sup>
 
+> [목차로 바로가기](#목차)
+
 ![image](https://user-images.githubusercontent.com/72078208/196261885-f27a81ba-ac47-4de7-be49-9aa462ffdead.png)
 
 IntelliJ 우측 상단의 [Gradle] 탭을 클릭한 후, [그림 3-88]과 같이 `:bootJar` 또는 `:build` task 명령을 더블 클릭합니다.
@@ -789,6 +807,8 @@ IntelliJ에서 애플리케이션을 실행하고 아래 URL을 웹 브라우저
 <BR>
 
 ### 9. Spring Rest Docs에서의 Asciidoc <sup>2022/10/18</sup>
+
+> [목차로 바로가기](#목차)
 
 #### [ 9-1 Asciidoc이란? ]
 
@@ -935,6 +955,8 @@ image::https://spring.io/images/spring-logo-9146a4d3298760c2e7e49595184e1975.svg
 <br>
 
 #### [ 9-2 Asciidoctor란? ]
+
+> [목차로 바로가기](#목차)
 
 Asciidoctor는 AsciiDoc 포맷의 문서를 파싱해서 HTML 5, 매뉴얼 페이지, PDF 및 EPUB 3 등의 문서를 생성하는 툴입니다.
 
