@@ -11,6 +11,7 @@
 | **4. [Given-When-Then 표현 스타일](#4-given-when-then-표현-스타일-20221011) <sup>2022/10/11</sup>** |
 | **5. [테스트 프레임워크 JUnit5](#5-테스트-프레임워크-junit5-20221011) <sup>2022/10/11</sup>** |
 | **6. [API 계층테스트 : 슬라이스 테스트](#6-api-계층테스트--슬라이스-테스트-20221011) <sup>2022/10/11</sup>** |
+| **7.** **[Mock](#7-Mock-20221017)** <SUP>2022/10/17</SUP>    |
 
 <br>
 
@@ -302,3 +303,195 @@ public class MemberRepositoryTest {
 ```
 
 - `@DataJpaTest` : 데이터 액세스 계층을 테스트 하기 위한 가장 핵심입니다. @DataJpaTest가 클래스에 추가됨으로써 Repository의 기능을 정상적으로 사용하기 위한 Configuration을 Spring이 자동으로 해주게 됩니다. 예제 코드에서는 MemberRepository의 기능을 정상적으로 사용하기 위한 Configuration을 Spring이 자동으로 해줍니다. 또한, @DataJpaTest는 `@Transactional`을 포함하고 있기 때문에 하나의 테스트 케이스 실행이 종료되는 시점에서 데이터 베이스에 저장된 데이터는 rollback처리 됩니다. 이로써 데이터 베이스의 상태는 유지할 수 있습니다.
+
+<br>
+
+### 7. Mock <SUP>2022/10/17</SUP>
+
+1. Mock이란?
+
+   - 테스트 세계에서의 Mock은 가짜 객체를 의미합니다.
+
+2. Mock을 사용하는 이유
+
+   <img width="607" alt="12143" src="https://user-images.githubusercontent.com/72078208/180656677-da0201e7-6135-4a28-ae1b-e6b17066aba5.png" style="zoom: 67%">
+
+   - [API 계층테스트 : 슬라이스 테스트](./spring/testing)의 [Controller 테스트](#1-controller-테스트) 소목록 3번에서 언급했듯이 애플리케이션에서 Controller만 테스트한다고 가정할 때 Service계층과 DataAccess계층을 모두 거치는 것은 슬라이스 테스트라고 볼 수 없습니다. 따라서 성능적으로나 슬라이스 테스트에 부합하지 않습니다. (위의 사진은 MemberController 슬라이스 테스트를 위해 모든 계층을 거치고 있는 것을 나타낸 그림입니다. )
+
+     <br>
+
+   <img width="583" alt="353653" src="https://user-images.githubusercontent.com/72078208/180657341-396a4f5c-588a-4fee-8799-8aa434c81203.png" style="zoom:67%;" >
+
+   - Mock객체를 사용하면 불필요한 계층의 과정은 거치지 않고 특정 계층의 테스트에 집중할 수 있습니다.
+
+3. Mock을 지원해주는 라이브러리
+   - Mock객체를 생성하고 진짜처럼 동작해주는 Mocking할 수 있게 해주는 대표 라이브러리는 Mockito입니다. Mockito는 계층의 분리를 시켜줌으로써 특정 계층의 테스트에 집중할 수 있도록 돕습니다.
+   
+4. **Mockito 적용한 예시 (1/2)**
+
+   - MemberController의 postMember()테스트에 Mockito 적용
+   - [참고자료](./sources/testing) (출처 : codestates)
+
+```java
+@SpringBootTest
+@AutoConfigureMockMvc
+class MemberControllerMockTest {
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private Gson gson;
+
+    @MockBean
+    private MemberService memberService;
+
+    @Autowired
+    private MemberMapper mapper;
+
+    @Test
+    void postMemberTest() throws Exception {
+        // given
+        MemberDto.Post post = new MemberDto.Post("hgd@gmail.com",
+                                                        "홍길동",
+                                                    "010-1234-5678");
+				
+        Member member = mapper.memberPostToMember(post);
+        member.setStamp(new Stamp());
+
+        
+        given(memberService.createMember(Mockito.any(Member.class)))
+                .willReturn(member);
+
+        String content = gson.toJson(post);
+
+        
+        ResultActions actions =
+                mockMvc.perform(
+                                    post("/v11/members")
+                                        .accept(MediaType.APPLICATION_JSON)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(content)
+                                );
+
+        
+        MvcResult result = actions
+                                .andExpect(status().isCreated())
+                                .andExpect(jsonPath("$.data.email").value(post.getEmail()))
+                                .andExpect(jsonPath("$.data.name").value(post.getName()))
+                                .andExpect(jsonPath("$.data.phone").value(post.getPhone()))
+                                .andReturn();
+
+//        System.out.println(result.getResponse().getContentAsString());
+    }
+}
+```
+
+- `@MockBean` : Application Context에 등록되어 있는 Bean에 대한 Mockito Mock 객체를 생성하고 주입하는 역할을 합니다. (Mock객체를 생성하고 주입한다는 것은 실제 코드의 의존성을 끊어주어 테스트 속도를 높인다고 이해해도 될 것 같습니다.)
+- `given(memberService.createMember(Mockito.any(Member.class))).willReturn(member)` : Mockito에서 지원하는 Stubbing 메소드입니다.
+  - `given(memberService.createMember(Mockito.any(Member.class)))` : given()은 Mock 객체가 특정 값을 리턴하는 동작을 지정하는데 사용하며, Mockito에서 지원하는 when()과 동일한 기능을 합니다. 해당 예제에서는 Mock객체인 memberService 객체로 createMember()메소드를 호출하도록 정의합니다. createMember()의 파라미터인 Mockito.any(Member.class)는 Mockito에서 지원하는 변수 타입 중 하나입니다. MockMemeberService(가칭)가 아닌 실제 MemberService 클래스에서 createMember()의 파라미터 타입은 Member임을 밝힙니다. 따라서 Mockito.any()에 Member.class를 타입으로 지정합니다.
+  - `willReturn(member)` : MockMemberService(가칭)의 createMember() 메소드가 리턴 할 Stub 데이터입니다.
+
+5. **Mockito 적용한 예시 (2/2)**
+
+   - MemberService의 createMember()테스트에 Mockito 적용
+
+   - ```
+     MemberService 클래스의 createMember()메소드는 비즈니스 로직입니다.
+     일반적으로 비즈니스 로직은 데이터 액세스 계층과는 무관하게 서비스 계층에 구현된 비즈니스 로직 자체를 Spring Framework의 도움을 받지 않고도 빠르게 진행할 수 있어야합니다.
+     ```
+
+   - [참고자료](./sources/testing) (출처 : codestates)
+
+   -  아래 코드는 MemberService 클래스 코드의 일부입니다.
+
+```java
+@Transactional
+@Service
+public class MemberService {
+    private final MemberRepository memberRepository;
+    private final ApplicationEventPublisher publisher;
+
+    public MemberService(MemberRepository memberRepository,
+                         ApplicationEventPublisher publisher) {
+        this.memberRepository = memberRepository;
+        this.publisher = publisher;
+
+    }
+
+    public Member createMember(Member member) {
+        verifyExistsEmail(member.getEmail());     // (1)
+        Member savedMember = memberRepository.save(member);
+
+        publisher.publishEvent(new MemberRegistrationApplicationEvent(this, savedMember));
+        return savedMember;
+    }
+
+    ...
+		...
+
+    private void verifyExistsEmail(String email) {
+        Optional<Member> member = memberRepository.findByEmail(email);  // (2)
+
+        // (3)
+        if (member.isPresent())
+            throw new BusinessLogicException(ExceptionCode.MEMBER_EXISTS);
+    }
+}
+```
+
+- 테스트의 목적은 DB에 존재하는 이메일인지 여부를 검증하는 `verifyExistsEmail()`메소드가 정상적으로 동작을 수행하는지를 테스트하는 것입니다.
+  - `verifyExistsEmail()` 메소드의 내부를 확인하면 (2)와 같이 `memberRepository.findByEamil(email)`로 DB내부에서 파라메터 email을 조건으로 회원 정보가 있는지 조회하고 있습니다. 하지만 우리는 `verifyExistsEmail()`메소드가 DB에서 Member 객체를 잘 조회하는지 여부를 테스트 하려는게 아니라, 어디서 조회하던 상관없이 조회된 Member객체가 null이면 `BusinessLogicException`을 잘 던지는지 여부만 테스트하면 됩니다.
+  - (3)과 같이 Member객체 null여부를 판단하는 것 역시 비즈니스 로직이라고 볼 수 있습니다.
+  - 따라서 DB에서 회원 정보를 조회하는 `memberRepository.findByEamil(email)`은 Mocking의 대상이 됩니다. 중요한 것은 Member객체를 어디에서 얻어오던지 상관없습니다. 즉, DB에서 회원 정보를 조회하지 않고 Mocking을 통해서 Member 객체를 제공할 수 있다는 것입니다.
+
+<br>
+
+- Mockito를 통한 Mocking구현
+
+```java
+package com.codestates.slice.mock;
+
+import com.codestates.exception.BusinessLogicException;
+import com.codestates.member.entity.Member;
+import com.codestates.member.repository.MemberRepository;
+import com.codestates.member.service.MemberService;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.given;
+
+// (1)
+@ExtendWith(MockitoExtension.class)
+public class MemberServiceMockTest {
+    @Mock   // (2)
+    private MemberRepository memberRepository;
+
+    @InjectMocks    // (3)
+    private MemberService memberService;
+
+    @Test
+    public void createMemberTest() {
+        // given
+        Member member = new Member("hgd@gmail.com", "홍길동", "010-1111-1111");
+
+        // (4)
+        given(memberRepository.findByEmail(member.getEmail()))
+                .willReturn(Optional.of(member)); // (5)
+
+				// when / then (6)
+        assertThrows(BusinessLogicException.class, () -> memberService.createMember(member));
+    }
+}
+```
+
+- `@ExtendWith(MockitoExtension.class)` : Spring을 사용하지 않고 JUnit에서 Mockito의 기능을 사용하기 위해서는 넣어줘야합니다.
+- `@Mock` : 필드의 객체를 Mock 객체로 생성합니다.
+- `@InjectMocks` : 이 어노테이션을 추가한 필드에 (2)에서 생성한 Mock객체를 주입합니다. **따라서 (3)의 memberService 객체는 주입 받은 memberRepository Mock 객체를 포함하고 있습니다.**
+- `given(memberRepository.findByEmail(member.getEmail())).willReturn(Optional.of(member));` : 여기서는 (2)에서 생성한 memberRepository Mock객체로 Stubbing을 하고 있습니다. `memberRepository.findByEmail(Mockito.anyString())`의 리턴 값으로 (5)와 같이 `Optional.of(member)`를 지정했기 때문에 테스트 케이스를 실행하면 결과는 “`passed`”입니다.
+- `Optional.of(member)` 의 member 객체에 포함된 이메일 주소가 `memberService.createMember(member)` 에서 파라미터로 전달한 member 객체에 포함된 이메일 주소와 동일하기 때문에 검증 결과가 “`passed`”라는 사실을 잘 이해해야합니다.

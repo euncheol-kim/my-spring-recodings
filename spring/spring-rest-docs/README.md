@@ -25,7 +25,7 @@
 >
 > - [Spring Docs와 관련한 주소](https://springdoc.org/)
 >
-> - 정리된 코드와 관련된 github 주소(링크)
+> - [정리된 코드와 관련된 github 주소](../sources/spring-rest-docs)
 
 ---
 
